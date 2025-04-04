@@ -53,7 +53,4 @@ O grande diferencial do TechPsic é sua capacidade de **registrar emoções em t
 ## **Status do Projeto**
 
 **Em desenvolvimento.**  
-O conceito, estrutura e design foram idealizados por **Gil**. A fase de desenvolvimento teve início em **abril de 2025**, com prazo estimado de 3 meses para a primeira versão funcional.
-
----
 
