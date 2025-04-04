@@ -1,6 +1,5 @@
-# **TechPsycho – Diário Emocional Interativo com Acesso Profissional**
-
-**Desenvolvido por:** Gil  
+# **TechPsic – Diário Emocional Interativo com Acesso Profissional**
+ 
 **Início do Projeto:** 03 de abril de 2025  
 **Tempo estimado de desenvolvimento:** 3 meses
 
@@ -8,10 +7,10 @@
 
 ## **Descrição**
 
-**TechPsycho** é um aplicativo mobile inovador voltado para psicólogos e seus pacientes.  
+**TechPsic** é um aplicativo mobile inovador voltado para psicólogos e seus pacientes.  
 Para os pacientes, ele funciona como um **diário emocional interativo**, com rolagem fluida e interface que simula um livro. Para os psicólogos, oferece uma **plataforma segura e organizada** para acompanhar o desenvolvimento emocional de cada paciente.
 
-O grande diferencial do TechPsycho é sua capacidade de **registrar emoções em tempo real**, com **segurança de ponta a ponta**, permitindo uma conexão mais profunda e humanizada entre paciente e profissional.
+O grande diferencial do TechPsic é sua capacidade de **registrar emoções em tempo real**, com **segurança de ponta a ponta**, permitindo uma conexão mais profunda e humanizada entre paciente e profissional.
 
 ---
 
