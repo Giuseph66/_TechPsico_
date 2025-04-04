@@ -20,7 +20,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      //router.replace('./chat');
+      //router.replace('./Profissional/Gerenciador_pacientes');
       router.replace('./login');
       //router.replace('./Paciente/diario/Capa');
       //router.replace('./Paciente/gerenciador_diario');
@@ -36,6 +36,11 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="Profissional/Cadastro_prof" options={{ headerShown: false }} />
+        <Stack.Screen name="Profissional/Gerenciador_pacientes" options={{ headerShown: false }} />
+        <Stack.Screen name="Profissional/paciente/Detalhes_paciente" options={{ headerShown: false }} />
+        <Stack.Screen name="Paciente/diario/Capa" options={{ headerShown: false }} />
+        <Stack.Screen name="Paciente/diario/Corpo" options={{ headerShown: false }} />
+        <Stack.Screen name="Paciente/diario/Fundo" options={{ headerShown: false }} />
         <Stack.Screen name="chat" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />

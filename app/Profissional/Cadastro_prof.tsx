@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,9 @@ import {
   Switch,
   StyleSheet,
   ScrollView,
+  ImageBackground,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import * as Yup from 'yup';
@@ -16,7 +19,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
-import { TextInputMask } from 'react-native-masked-text'; // Adicione esta importação
+import { TextInputMask } from 'react-native-masked-text';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { themeColors } from '@/constants/themeColors';
+import { useRouter } from 'expo-router';
+
+const { width, height } = Dimensions.get('window');
 
 // Validações com Yup
 const schema = Yup.object().shape({
@@ -68,6 +76,23 @@ const RegistrationScreen = () => {
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const animatedValue = useRef(new Animated.Value(0)).current;
+  const colorScheme = useColorScheme();
+  const colors = themeColors[colorScheme || 'light'];
+  const router = useRouter();
+
+  useEffect(() => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, [animatedValue]);
+
+  const translateY = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [50, 0],
+  });
 
   const onSubmit = (data) => {
     console.log('Dados do formulário:', data);
@@ -83,421 +108,547 @@ const RegistrationScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Cadastro do Psicólogo</Text>
+    <ImageBackground
+      source={require('../../assets/images/fundo.png')}
+      style={[styles.background, { backgroundColor: colors.background }]}
+      imageStyle={[styles.backgroundImage, { tintColor: colors.imageTint }]}
+    >
+      <View style={[styles.overlay, { backgroundColor: colors.overlay }]} />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Animated.View
+          style={[
+            styles.card,
+            { 
+              backgroundColor: colors.cardBackground, 
+              opacity: animatedValue, 
+              transform: [{ translateY }] 
+            }
+          ]}
+        >
+          <Text style={[styles.title, { color: colors.text }]}>Cadastro do Psicólogo</Text>
 
-        <Controller
-          control={control}
-          name="fullName"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Nome Completo</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Seu nome completo"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
+          {/* Seção 1: Dados Pessoais */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Dados Pessoais</Text>
+            <Controller
+              control={control}
+              name="fullName"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Nome Completo</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                    placeholder="Seu nome completo"
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.fullName && <Text style={styles.errorText}>{errors.fullName.message}</Text>}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>E-mail</Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { backgroundColor: colors.inputBackground, color: colors.text },
+                      value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? { borderColor: 'red' } : {},
+                    ]}
+                    placeholder="email@exemplo.com"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+                </View>
+              )}
+            />
+
+            <View style={styles.row}>
+              <Controller
+                control={control}
+                name="cpf"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>CPF</Text>
+                    <TextInputMask
+                      type="cpf"
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="000.000.000-00"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.cpf && <Text style={styles.errorText}>{errors.cpf.message}</Text>}
+                  </View>
+                )}
               />
-              {errors?.fullName && <Text style={styles.errorText}>{errors.fullName.message}</Text>}
+
+              <Controller
+                control={control}
+                name="birthDate"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>Data de Nascimento</Text>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                      <Text style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}>
+                        {value ? format(new Date(value), 'dd/MM/yyyy') : 'Selecione a data'}
+                      </Text>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                      <DateTimePicker
+                        value={value ? new Date(value) : new Date()}
+                        mode="date"
+                        display="default"
+                        onChange={(event, selectedDate) => {
+                          setShowDatePicker(false);
+                          if (selectedDate && event.type === 'set') {
+                            onChange(selectedDate.toISOString());
+                          }
+                        }}
+                      />
+                    )}
+                    {errors?.birthDate && <Text style={styles.errorText}>{errors.birthDate.message}</Text>}
+                  </View>
+                )}
+              />
             </View>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="email"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>E-mail</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? { borderColor: 'red' } : {},
-                ]}
-                placeholder="email@exemplo.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-              {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-            </View>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="password"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Senha</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Senha"
-                secureTextEntry
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-              {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-            </View>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="confirmPassword"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Confirmar Senha</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Confirme sua senha"
-                secureTextEntry
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>}
-            </View>
-          )}
-        />
-
-        <View style={styles.row}>
-          <Controller
-            control={control}
-            name="crpNumber"
-            render={({ onChange, onBlur, value }) => (
-              <View style={[styles.inputContainer, styles.smallInputContainer]}>
-                <Text>CRP</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="123456"
-                  keyboardType="numeric"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-                {errors.crpNumber && <Text style={styles.errorText}>{errors.crpNumber.message}</Text>}
-              </View>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="crpState"
-            render={({ onChange, onBlur, value }) => (
-              <View style={[styles.inputContainer, styles.smallInputContainer]}>
-                <Text>Estado(CRP)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="SP"
-                  maxLength={2}
-                  autoCapitalize="characters"
-                  onBlur={onBlur}
-                  onChangeText={(text) => onChange(text.toUpperCase())}
-                  value={value}
-                />
-                {errors.crpState && <Text style={styles.errorText}>{errors.crpState.message}</Text>}
-              </View>
-            )}
-          />
-        </View>
-
-        <Controller
-          control={control}
-          name="cpf"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>CPF</Text>
-              <TextInputMask
-                type="cpf"
-                style={styles.input}
-                placeholder="000.000.000-00"
-                value={value}
-                onBlur={onBlur}
-                onChangeText={onChange}
-              />
-              {errors.cpf && <Text style={styles.errorText}>{errors.cpf.message}</Text>}
-            </View>
-          )}
-        />
-
-        <View style={styles.row}>
-        <Controller
-        control={control}
-        name="birthDate"
-        render={({ field: { onChange, value } }) => (
-          <View style={[styles.inputContainer, styles.smallInputContainer]}>
-            <Text>
-              Data de Nascimento
-            </Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.input}>
-                {value ? format(new Date(value), 'dd/MM/yyyy') : 'Selecione a data'}
-              </Text>
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={value ? new Date(value) : new Date()}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(false);
-                  // Se o usuário confirmar a seleção (não cancelar)
-                  if (selectedDate && event.type === 'set') {
-                    const formattedDate = selectedDate.toISOString();
-                    console.log('Data selecionada (formatação ISO):', formattedDate);
-                    console.log('Data selecionada (formatada):', format(selectedDate, 'dd/MM/yyyy'));
-                    onChange(formattedDate); // Atualiza o valor no formulário
-                  }
-                }}
-              />
-            )}
-            {errors.birthDate && (
-              <Text style={styles.errorText}>{errors.birthDate.message}</Text>
-            )}
           </View>
-        )}
-      />
 
-          <Controller
-            control={control}
-            name="phone"
-            render={({ onChange, onBlur, value }) => (
-              <View style={[styles.inputContainer, styles.smallInputContainer]}>
-                <Text>Telefone</Text>
-                <TextInputMask
-                  type="cel-phone"
-                  options={{
-                    maskType: 'BRL',
-                    withDDD: true,
-                    dddMask: '(99) ',
-                  }}
-                  style={styles.input}
-                  placeholder="(00) 00000-0000"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                />
-                {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
-              </View>
-            )}
-          />
-        </View>
-
-        <Text style={styles.sectionTitle}>Endereço</Text>
-
-        <View style={styles.row}>
-          <Controller
-            control={control}
-            name="cep"
-            render={({ onChange, onBlur, value }) => (
-              <View style={[styles.inputContainer, styles.smallInputContainer]}>
-                <Text>CEP</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="CEP"
-                  keyboardType="numeric"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-                {errors.cep && <Text style={styles.errorText}>{errors.cep.message}</Text>}
-              </View>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="number"
-            render={({ onChange, onBlur, value }) => (
-              <View style={[styles.inputContainer, styles.smallInputContainer]}>
-                <Text>Número</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Número"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-                {errors.number && <Text style={styles.errorText}>{errors.number.message}</Text>}
-              </View>
-            )}
-          />
-        </View>
-
-        <Controller
-          control={control}
-          name="street"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Rua</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Rua"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
+          {/* Seção 2: Dados Profissionais */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Dados Profissionais</Text>
+            <View style={styles.row}>
+              <Controller
+                control={control}
+                name="crpNumber"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>Número do CRP</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="123456"
+                      keyboardType="numeric"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.crpNumber && <Text style={styles.errorText}>{errors.crpNumber.message}</Text>}
+                  </View>
+                )}
               />
-              {errors.street && <Text style={styles.errorText}>{errors.street.message}</Text>}
-            </View>
-          )}
-        />
 
-        <Controller
-          control={control}
-          name="city"
-          render={({ onChange, onBlur, value }) => (
-            <View style={[styles.inputContainer, styles.smallInputContainer]}>
-              <Text>Cidade</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Cidade"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
+              <Controller
+                control={control}
+                name="crpState"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>Estado do CRP</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="SP"
+                      maxLength={2}
+                      autoCapitalize="characters"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.crpState && <Text style={styles.errorText}>{errors.crpState.message}</Text>}
+                  </View>
+                )}
               />
-              {errors.city && <Text style={styles.errorText}>{errors.city.message}</Text>}
             </View>
-          )}
-        />
 
-        <Controller
-          control={control}
-          name="state"
-          render={({ onChange, onBlur, value }) => (
-            <View style={[styles.inputContainer, styles.smallInputContainer]}>
-              <Text>Estado (Ex: SP)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Estado"
-                maxLength={2}
-                autoCapitalize="characters"
-                onBlur={onBlur}
-                onChangeText={(text) => onChange(text.toUpperCase())}
-                value={value}
+            <Controller
+              control={control}
+              name="specialty"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Especialidade</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                    placeholder="Ex: Psicologia Clínica"
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.specialty && <Text style={styles.errorText}>{errors.specialty.message}</Text>}
+                </View>
+              )}
+            />
+          </View>
+
+          {/* Seção 3: Contato e Endereço */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Contato e Endereço</Text>
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Telefone</Text>
+                  <TextInputMask
+                    type="cel-phone"
+                    options={{
+                      maskType: 'BRL',
+                      withDDD: true,
+                      dddMask: '(99) ',
+                    }}
+                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                    placeholder="(00) 00000-0000"
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+                </View>
+              )}
+            />
+
+            <View style={styles.row}>
+              <Controller
+                control={control}
+                name="cep"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>CEP</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="00000-000"
+                      keyboardType="numeric"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.cep && <Text style={styles.errorText}>{errors.cep.message}</Text>}
+                  </View>
+                )}
               />
-              {errors.state && <Text style={styles.errorText}>{errors.state.message}</Text>}
-            </View>
-          )}
-        />
 
-        <Controller
-          control={control}
-          name="specialty"
-          render={({ onChange, onBlur, value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Especialidade</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ex: Psicologia Clínica"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
+              <Controller
+                control={control}
+                name="number"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>Número</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="Número"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.number && <Text style={styles.errorText}>{errors.number.message}</Text>}
+                  </View>
+                )}
               />
-              {errors.specialty && <Text style={styles.errorText}>{errors.specialty.message}</Text>}
             </View>
-          )}
-        />
 
-        <Controller
-          control={control}
-          name="diploma"
-          render={({ value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Diploma (Anexar arquivo)</Text>
-              <Button
-                title={value ? "Arquivo selecionado" : "Selecionar arquivo"}
-                onPress={() => pickDocument('diploma')}
+            <Controller
+              control={control}
+              name="street"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Rua</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                    placeholder="Nome da rua"
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.street && <Text style={styles.errorText}>{errors.street.message}</Text>}
+                </View>
+              )}
+            />
+
+            <View style={styles.row}>
+              <Controller
+                control={control}
+                name="city"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>Cidade</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="Cidade"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.city && <Text style={styles.errorText}>{errors.city.message}</Text>}
+                  </View>
+                )}
               />
-              {errors.diploma && <Text style={styles.errorText}>{errors.diploma.message}</Text>}
-            </View>
-          )}
-        />
 
-        <Controller
-          control={control}
-          name="identity"
-          render={({ value }) => (
-            <View style={styles.inputContainer}>
-              <Text>Documento de Identidade (Anexar arquivo)</Text>
-              <Button
-                title={value ? "Arquivo selecionado" : "Selecionar arquivo"}
-                onPress={() => pickDocument('identity')}
+              <Controller
+                control={control}
+                name="state"
+                render={({ field: { onChange, value } }) => (
+                  <View style={[styles.inputContainer, styles.smallInputContainer]}>
+                    <Text style={[styles.label, { color: colors.text }]}>Estado</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                      placeholder="UF"
+                      maxLength={2}
+                      autoCapitalize="characters"
+                      placeholderTextColor={colors.placeholder}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                    {errors?.state && <Text style={styles.errorText}>{errors.state.message}</Text>}
+                  </View>
+                )}
               />
-              {errors.identity && <Text style={styles.errorText}>{errors.identity.message}</Text>}
             </View>
-          )}
-        />
+          </View>
 
-        <Controller
-          control={control}
-          name="terms"
-          render={({ onChange, value }) => (
-            <View style={styles.inputContainer}>
-              <View style={styles.termsContainer}>
-                <Switch value={value} onValueChange={onChange} />
-                <Text style={{ marginLeft: 8 }}>Aceito os termos de uso</Text>
-              </View>
-              {errors.terms && <Text style={styles.errorText}>{errors.terms.message}</Text>}
-            </View>
-          )}
-        />
+          {/* Seção 4: Documentos */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Documentos</Text>
+            <Controller
+              control={control}
+              name="diploma"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Diploma</Text>
+                  <TouchableOpacity
+                    style={[styles.documentButton, { backgroundColor: colors.buttonBackground }]}
+                    onPress={() => pickDocument('diploma')}
+                  >
+                    <Text style={[styles.documentButtonText, { color: colors.buttonText }]}>
+                      {value ? 'Arquivo selecionado' : 'Selecionar arquivo'}
+                    </Text>
+                  </TouchableOpacity>
+                  {errors?.diploma && <Text style={styles.errorText}>{errors.diploma.message}</Text>}
+                </View>
+              )}
+            />
 
-        <Button title="Cadastrar" onPress={handleSubmit(onSubmit)} />
-      </View>
-    </ScrollView>
+            <Controller
+              control={control}
+              name="identity"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Documento de Identidade</Text>
+                  <TouchableOpacity
+                    style={[styles.documentButton, { backgroundColor: colors.buttonBackground }]}
+                    onPress={() => pickDocument('identity')}
+                  >
+                    <Text style={[styles.documentButtonText, { color: colors.buttonText }]}>
+                      {value ? 'Arquivo selecionado' : 'Selecionar arquivo'}
+                    </Text>
+                  </TouchableOpacity>
+                  {errors?.identity && <Text style={styles.errorText}>{errors.identity.message}</Text>}
+                </View>
+              )}
+            />
+          </View>
+
+          {/* Seção 5: Senha e Termos */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Senha e Termos</Text>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Senha</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                    placeholder="Sua senha"
+                    secureTextEntry
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label, { color: colors.text }]}>Confirmar Senha</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                    placeholder="Confirme sua senha"
+                    secureTextEntry
+                    placeholderTextColor={colors.placeholder}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors?.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="terms"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <View style={styles.termsContainer}>
+                    <Switch
+                      value={value}
+                      onValueChange={onChange}
+                      trackColor={{ false: '#767577', true: colors.buttonBackground }}
+                      thumbColor={value ? colors.buttonText : '#f4f3f4'}
+                    />
+                    <Text style={[styles.termsText, { color: colors.text }]}>
+                      Eu concordo com os termos de uso e política de privacidade
+                    </Text>
+                  </View>
+                  {errors?.terms && <Text style={styles.errorText}>{errors.terms.message}</Text>}
+                </View>
+              )}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: colors.buttonBackground }]}
+            onPress={handleSubmit(onSubmit)}
+          >
+            <Text style={[styles.buttonText, { color: colors.buttonText }]}>Cadastrar</Text>
+          </TouchableOpacity>
+
+          {/* Botão temporário para o gerenciador de pacientes */}
+          <TouchableOpacity
+            style={[styles.tempButton, { backgroundColor: colors.buttonBackground }]}
+            onPress={() => router.push('/Profissional/Gerenciador_pacientes')}
+          >
+            <Text style={[styles.buttonText, { color: colors.buttonText }]}>Ir para Gerenciador de Pacientes</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  backgroundImage: {
+    resizeMode: 'cover',
+    opacity: 0.8,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.3,
+  },
   scrollContainer: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    paddingTop: 40,
+    paddingBottom: 40,
   },
-  container: {
-    flex: 1,
+  card: {
+    width: width * 0.9,
+    maxWidth: 500,
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
   inputContainer: {
+    width: '100%',
     marginBottom: 15,
   },
-  smallInputContainer: {
-    flex: 1,
-    marginRight: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    padding: 10,
-    marginTop: 5,
+    width: '100%',
+    height: 50,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    fontSize: 16,
+  },
+  button: {
+    width: '100%',
+    height: 50,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   errorText: {
     color: 'red',
     marginTop: 5,
   },
+  section: {
+    marginBottom: 20,
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  smallInputContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
   termsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 10,
+  },
+  termsText: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  documentButton: {
+    height: 50,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  documentButtonText: {
+    fontSize: 16,
+  },
+  tempButton: {
+    width: '100%',
+    height: 50,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
 

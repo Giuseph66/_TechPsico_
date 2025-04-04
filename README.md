@@ -1,31 +1,60 @@
-# Psicólogo App
+# **TechPsycho – Diário Emocional Interativo com Acesso Profissional**
 
-Aplicativo mobile desenvolvido com **React Native** e **Expo** que permite ao psicólogo se cadastrar e gerenciar seus casos de forma completa e segura. O projeto demonstra o uso de formulários com validação utilizando **react-hook-form** e **Yup**, além da integração com o **expo-document-picker** e o **DateTimePicker**.
+**Desenvolvido por:** Gil  
+**Início do Projeto:** 03 de abril de 2025  
+**Tempo estimado de desenvolvimento:** 3 meses
 
-## Recursos
+---
 
-- **Tela de Cadastro Completo:**  
-  Permite que o profissional se cadastre informando dados pessoais, documentos, endereço, especialidade e outros detalhes importantes, garantindo a integridade dos dados com validações rigorosas.
-  
-- **Tela de Gerenciamento de Casos:**  
-  Exibe uma lista de casos (simulados inicialmente com dados dummy) e possibilita atualizar o status de cada caso (por exemplo, marcar como "Fechado").
-  
-- **Validações com Yup:**  
-  Utiliza regras de validação para garantir que todos os campos essenciais sejam preenchidos corretamente, ajudando a prevenir fraudes.
-  
-- **Upload de Documentos:**  
-  Implementa a funcionalidade de anexar arquivos (diploma e documento de identidade) utilizando o `expo-document-picker`.
+## **Descrição**
 
-## Instalação
+**TechPsycho** é um aplicativo mobile inovador voltado para psicólogos e seus pacientes.  
+Para os pacientes, ele funciona como um **diário emocional interativo**, com rolagem fluida e interface que simula um livro. Para os psicólogos, oferece uma **plataforma segura e organizada** para acompanhar o desenvolvimento emocional de cada paciente.
 
-### Pré-requisitos
-- Node.js instalado
-- Expo CLI instalado globalmente (caso ainda não tenha, instale com `npm install -g expo-cli`)
+O grande diferencial do TechPsycho é sua capacidade de **registrar emoções em tempo real**, com **segurança de ponta a ponta**, permitindo uma conexão mais profunda e humanizada entre paciente e profissional.
 
-### Passos
+---
 
-1. **Clone o repositório:**
+## **Funcionalidades Principais**
 
-   ```bash
-   git clone https://github.com/seu-usuario/psicologo-app.git
-   cd psicologo-app
+### **Para o Paciente**
+- Interface em formato de livro com rolagem horizontal (dias) e vertical (páginas).
+- Modal flutuante com ícones de emoções (feliz, triste, neutro, raiva etc.) que acompanha a linha ativa durante a escrita.
+- Emoções são fixadas automaticamente após 10 minutos de inatividade ou fechamento do app.
+- Possibilidade de retomar o trecho anterior ou iniciar um novo, com nova emoção.
+- Tema escuro ou claro adaptado conforme o tema do dispositivo.
+
+### **Para o Psicólogo**
+- Acesso completo e seguro aos diários dos pacientes com divisão emocional e temporal.
+- Organização por blocos emocionais e data/hora.
+- Visualização intuitiva para melhor acompanhamento terapêutico.
+- Possibilidade de interação direta com o paciente dentro do app.
+
+---
+
+## **Segurança (Pilar Central)**
+
+- Todos os dados são **criptografados no momento do salvamento**, garantindo segurança máxima para pacientes e profissionais.
+- O sistema adota criptografia ponta a ponta para proteger todas as interações.
+- O acesso ao conteúdo é exclusivo e autenticado para cada perfil (paciente ou psicólogo).
+
+---
+
+## **Tecnologias Recomendadas**
+
+- **Front-end:** React Native ou Flutter  
+- **Back-end:** Firebase / Supabase com autenticação segura  
+- **Banco local:** SQLite para escrita offline  
+- **Criptografia:** AES 256 para dados locais e comunicação segura com a nuvem  
+- **Animações:** Lottie / Framer Motion (suavidade visual)  
+- **Notificações:** Push para lembretes e interações
+
+---
+
+## **Status do Projeto**
+
+**Em desenvolvimento.**  
+O conceito, estrutura e design foram idealizados por **Gil**. A fase de desenvolvimento teve início em **abril de 2025**, com prazo estimado de 3 meses para a primeira versão funcional.
+
+---
+

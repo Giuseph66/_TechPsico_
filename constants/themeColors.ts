@@ -1,0 +1,26 @@
+export const themeColors = {
+  light: {
+    background: '#fff',
+    overlay: '#fff',
+    cardBackground: 'rgba(255,255,255,0.9)',
+    text: '#000',
+    placeholder: '#ccc',
+    inputBackground: '#fff',
+    buttonBackground: '#000',
+    buttonText: '#fff',
+    professionalText: '#000',
+    imageTint: 'rgba(64, 160, 250, 0.32)',
+  },
+  dark: {
+    background: '#000',
+    overlay: '#000',
+    cardBackground: 'rgba(0,0,0,0.9)',
+    text: '#fff',
+    placeholder: '#888',
+    inputBackground: '#333',
+    buttonBackground: '#fff',
+    buttonText: '#000',
+    professionalText: '#fff',
+    imageTint: 'rgba(255,215,0,0.3)',
+  },
+};
